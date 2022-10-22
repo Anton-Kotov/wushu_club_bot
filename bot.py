@@ -13,9 +13,11 @@ from tg_bot.config import load_config
 
 # def register_all_filters(dp):
 #     dp.filters_factory.bind()
+from tg_bot.handlers.start import register_start
 
 
 def register_all_handlers(dp):
+    register_start(dp)
 
 
 
