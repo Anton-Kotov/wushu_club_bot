@@ -33,4 +33,4 @@ def get_student(cursor):
     cursor.execute("SELECT NAME "
                    "FROM common_info "
                    "INNER JOIN students_name ON common_info.student_id = students_name.student_id;")
-    return cursor.fetchall()
+    return cursor.fetchone()
