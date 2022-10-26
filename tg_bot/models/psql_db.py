@@ -29,8 +29,16 @@ def add_student_level(connection, cursor, level):
     connection.commit()
 
 
-def get_student(cursor):
-    cursor.execute("SELECT NAME "
-                   "FROM common_info "
-                   "INNER JOIN students_name ON common_info.student_id = students_name.student_id;")
+def get_student(cursor, telegram_id):
+    cursor.execute("SELECT NAME, TELEGRAM_ID, BIRTHDATE, START_DATE, STYLE, LEVEL "
+                   "FROM  students_name "
+                   "LEFT JOIN data ON students_name.data_id = data.data_id "
+                   "LEFT JOIN styles ON data.style_id = styles.style_id "
+                   "LEFT JOIN levels ON styles.level_id = levels.level_id "
+                   f"WHERE TELEGRAM_ID = {telegram_id}")
     return cursor.fetchone()
+
+
+def get_telegram_id(cursor):
+    cursor.execute("SELECT TELEGRAM_ID FROM data;")
+    return cursor.fetchall()

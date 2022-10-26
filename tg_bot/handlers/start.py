@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import CommandStart
 from tg_bot.keyboards.inline import register
 from tg_bot.keyboards.reply import first_time
 from tg_bot.models.psql_db import create_table, add_student_name, \
-    add_student_style, add_student_level, add_data, get_student
+    add_student_style, add_student_level, add_data, get_student, get_telegram_id
 
 
 async def bot_start(message: types.Message):
@@ -18,20 +18,30 @@ async def bot_start(message: types.Message):
     cursor = bot.get("cursor")
 
     # create_table(connection, cursor)
-    print(get_student(cursor))
 
     await message.answer(text="Вы уже учитесь у нас или еще нет?", reply_markup=first_time)
 
 
-
 async def student(message: types.Message):
     await message.answer(text="Мы рады видеть вас в нашем боте")
-    await message.answer(text="Вы пользуетесь ботом впервые.", reply_markup=register)  # здесь добавить проверку на наличие пользователя в бд
+    bot = message.bot
+    cursor = bot.get("cursor")
+    telegram_id = get_telegram_id(cursor)
+    print(telegram_id)
+    print(get_student(cursor, message.from_user.id))
+    if telegram_id == [] or message.from_user.id not in telegram_id[0]:             # проверка на наличие пользователя в БД
+        await message.answer(text="Вы пользуетесь ботом впервые.", reply_markup=register)
+    else:
+        name = get_student(cursor, message.from_user.id)[0]
+        await message.answer(text=f"Здравствуйте, {name}!", reply_markup=types.ReplyKeyboardRemove())
+        await message.answer_photo(photo="https://courses24.net/wp-content/uploads/2021/11/"
+                                         "tajczzi-czigun-tri-stupeni-aleksandr-zhitomirskij_6196e682514cf.png",
+                                   caption="Добро пожаловать в центр традиционного ушу УЦЗИМЭНЬ")
 
 
 async def register_name(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
-    await callback.message.answer(text="Напишите: Фамилию Имя Отчество")
+    await callback.message.answer(text="Напишите: Фамилию Имя")
     await state.set_state("name")
 
 
@@ -56,7 +66,6 @@ async def register_style(message: types.Message, state: FSMContext):
 
     async with state.proxy() as data:
         data["start_date"] = message.text
-
     await message.answer(text="Какие стили ушу вы практикуете:")
     await state.set_state("style")
 
@@ -82,6 +91,9 @@ async def register_final(message: types.Message, state: FSMContext):
     await message.answer(text="Благодарим за регистрацию")
     await state.reset_data()
     await state.finish()
+    await message.answer_photo(photo="https://courses24.net/wp-content/uploads/2021/11/"
+                                     "tajczzi-czigun-tri-stupeni-aleksandr-zhitomirskij_6196e682514cf.png",
+                               caption="Добро пожаловать в центр традиционного ушу УЦЗИМЭНЬ")
 
 
 
