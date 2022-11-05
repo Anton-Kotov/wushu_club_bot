@@ -14,12 +14,15 @@ from tg_bot.config import load_config
 
 # def register_all_filters(dp):
 #     dp.filters_factory.bind()
+from tg_bot.database.pg_commands import Database
+from tg_bot.handlers.main_menu import register_main_menu
 from tg_bot.handlers.start import register_start
 
 
 
 def register_all_handlers(dp):
     register_start(dp)
+    register_main_menu(dp)
 
 
 
@@ -29,14 +32,8 @@ async def main():
     storage = RedisStorage2() if config.tg_bot.use_redis else MemoryStorage()
     dp = Dispatcher(bot, storage=storage)
 
-    connection = psycopg2.connect(dbname=config.db.database, user=config.db.user,
-                                  password=config.db.password, host=config.db.host,
-                                  port="5432")
-    cursor = connection.cursor()
-    # cursor.execute(''' DROP TABLE IF EXISTS master ''')
-
-    bot['connection'] = connection
-    bot['cursor'] = cursor
+    db = Database()
+    bot["db"] = db
 
 
     # register_all_middlewares(dp)
@@ -45,10 +42,10 @@ async def main():
 
 
     try:
+        await db.create()
         await dp.start_polling()
     finally:
-        cursor.close()
-        connection.close()
+        await db.close()
         await dp.storage.close()
         await dp.storage.wait_closed()
         await bot.session.close()

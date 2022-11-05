@@ -2,7 +2,23 @@
 
 def create_table(connection, cursor):
 
-   with open("tg_bot/misc/db.sql", "r") as sql:
+   with open("tg_bot/misc/db_register.sql", "r") as sql:
+
+    cursor.execute(sql.read())
+    connection.commit()
+
+
+def create_table_info(connection, cursor):
+
+   with open("tg_bot/misc/db_info.sql", "r") as sql:
+
+    cursor.execute(sql.read())
+    connection.commit()
+
+
+def add_to_menu(connection, cursor):
+
+   with open("tg_bot/misc/db_add_to_menu.sql", "r") as sql:
 
     cursor.execute(sql.read())
     connection.commit()
