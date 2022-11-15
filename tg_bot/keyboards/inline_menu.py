@@ -48,3 +48,42 @@ async def categories_keyboard(db, main):
             callback_data=make_callback_data(level=CURRENT_LEVEL - 1, main=main))
         )
     return markup
+
+async def subcategories_keyboard(db, main, category):
+    CURRENT_LEVEL = 2
+    markup = InlineKeyboardMarkup(row_width=2)
+    subcategories = await db.get_subcategories(main, category)
+
+    for subcategory in sorted(subcategories, key=lambda el: el[0]):
+        button_text = f"{subcategory[1]}"
+        callback_data = make_callback_data(level=CURRENT_LEVEL + 1,
+                                           main=main,
+                                           category=category,
+                                           subcategory=subcategory[0])
+        markup.insert(
+            InlineKeyboardButton(text=button_text, callback_data=callback_data)
+        )
+
+    markup.row(
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data=make_callback_data(level=CURRENT_LEVEL - 1,
+                                             main=main,
+                                             category=category))
+        )
+    return markup
+
+async def back_keyboard(main, category, subcategory):
+    CURRENT_LEVEL = 3
+    markup = InlineKeyboardMarkup(row_width=1)
+
+    markup.insert(
+        InlineKeyboardButton(
+            text="Назад",
+            callback_data=make_callback_data(level=CURRENT_LEVEL - 1,
+                                             main=main,
+                                             category=category,
+                                             subcategory=subcategory))
+        )
+
+    return markup

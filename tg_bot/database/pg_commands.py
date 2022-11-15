@@ -78,6 +78,25 @@ class Database:
 
         return await self.execute(sql, fetch=True)
 
+    async def get_subcategories(self, main, category):
+
+        sql = f""" 
+        SELECT DISTINCT SUBCATEGORY_CODE, SUBCATEGORY_NAME
+        FROM menu
+        WHERE MAIN_CODE = '{main}' AND CATEGORY_CODE = '{category}'; """
+
+        return await self.execute(sql, fetch=True)
+
+    async def get_informations(self, main, category, subcategory):
+
+        sql = f""" 
+        SELECT DISTINCT TEXT, PHOTO
+        FROM menu
+        WHERE MAIN_CODE = '{main}' AND CATEGORY_CODE = '{category}' 
+        AND SUBCATEGORY_CODE = '{subcategory}'; """
+
+        return await self.execute(sql, fetch=True)
+
     async def close(self) -> None:
         if self.pool is None:
             return None
